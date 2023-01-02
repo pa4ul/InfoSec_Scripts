@@ -17,6 +17,11 @@
     })
 
     message_length = ProtoField.uint16("dicom-a.message_length", "messageLength", base.DEC)
+    protocol_version = ProtoField.uint8("dicom-a.protocol_version","protocolVersion",base.DEC)
+    calling_application = ProtoField.string("dicom-a.calling_app","callingApplication")
+    called_application = ProtoField.string("dicom-a.called_app","calledApplication")
+
+
     
     dicom_protocol.fields = { message_length, pdu_type }
     
@@ -30,6 +35,16 @@
     
       subtree:add_le(pdu_type, buffer(0,1))
       subtree:add(message_length, buffer(2,4))
+      
+
+      local pdu_id = buffer(0,1):uint()
+      if pdu_id == 1 or pdu_id == 2 then -- ASSOC-Req (1) / ASSOC-Resp (2)
+        local assoc_tree = subtree:add(dicom_protocol, buffer(), "ASSOCIATE REQ/RSP")
+        assoc_tree:add(protocol_version, buffer(6,2))
+        assoc_tree:add(protocol_version, buffer(10,16))
+        assoc_tree:add(protocol_version, buffer(26,16))
+
+      end
 
     end
     
